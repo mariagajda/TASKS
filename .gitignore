@@ -1,20 +1,18 @@
-.htaccess
-/config.php
-admin/config.php
+target/*
+.settings/*
+.classpath
+.project
+.factorypath
+.attach_pid*
+.idea
+*.iml
+/target
+_site/
 
-!index.html
-
-download/
-image/data/
-image/cache/
-system/cache/
-system/logs/
-
-system/storage/
-
-# vQmod log files
-vqmod/logs/*
-# vQmod cache files
-vqmod/vqcache/*
-vqmod/checked.cache
-vqmod/mods.cache
+*.class
+*.jar
+*.war
+*.ear
+*.logs
+.idea/
+.eclipse
