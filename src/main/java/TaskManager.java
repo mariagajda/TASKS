@@ -5,20 +5,30 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class TaskManager {
 
     public static void main(String[] args) {
+        numberOflines();
+        arrayWithLines();
+        columnsCounter();
         tasks();
         selectAnOption();
     }
 
 
+    public static String fileName() {
+        return "tasks.csv";
+    }
+
     //liczy linie z wczytywanego pliku:
     public static int numberOflines() {
-        File file = new File("tasks.csv");
+        File file = new File(fileName());
         int linesCounter = 0;
 
         try (Scanner scan = new Scanner(file)) {
@@ -34,9 +44,9 @@ public class TaskManager {
     }
 
 
-    // liczy kolumny z wczytywanego pliku i tworzy tablice jednowymiarową z liniami wczytanymi z pliku:
-    public static String[] tableWithLines() {
-        File file = new File("tasks.csv");
+    // tworzy tablice jednowymiarową z liniami wczytanymi z pliku:
+    public static String[] arrayWithLines() {
+        File file = new File(fileName());
         String[] lines = new String[numberOflines()];
         try (Scanner scan = new Scanner(file)) {
             for (int i = 0; i < lines.length; i++) {
@@ -51,19 +61,15 @@ public class TaskManager {
 
     //liczy kolumny:
     public static int columnsCounter() {
-        int columnsCounter = 0;
-        for (int i = 0; i < numberOflines(); i++) {
-            String[] columns = tableWithLines()[i].split(", ");
-            columnsCounter = columns.length;
-        }
+        int columnsCounter = 3;
         return columnsCounter;
     }
 
     public static String[][] tasks() {
 // wczytuje dane do tablicy dwuwymiarowej
-        String[][] tasks = new String[tableWithLines().length][columnsCounter()];
-        for (int i = 0; i < tableWithLines().length; i++) {
-            String[] columns = tableWithLines()[i].split(", ");
+        String[][] tasks = new String[arrayWithLines().length][columnsCounter()];
+        for (int i = 0; i < arrayWithLines().length; i++) {
+            String[] columns = arrayWithLines()[i].split(", ");
             for (int j = 0; j < columnsCounter(); j++) {
                 tasks[i][j] = columns[j];
             }
@@ -82,17 +88,17 @@ public class TaskManager {
         String optionChosen = scan.nextLine();
         String[][] newTasks;
 
-        while (!optionChosen.equals("quit")) {
-            if (optionChosen.equals("add")) {
+        switch (optionChosen) {
+            case "add": {
                 Scanner scan1 = new Scanner(System.in);
                 newTasks = new String[numberOflines() + 1][columnsCounter()];
 
                 System.out.println("Please add task description:");
-                String description = scan1.next();
+                String description = scan1.nextLine();
                 System.out.println("Please add task due date");
-                String dueDate = scan1.next();
+                String dueDate = scan1.nextLine();
                 System.out.println("Is your task important: true/false");
-                String importance = scan1.next();
+                String importance = scan1.nextLine();
 
                 for (int i = 0; i < newTasks.length; i++) {
                     if (i < newTasks.length - 1) {
@@ -104,23 +110,38 @@ public class TaskManager {
                         newTasks[i][1] = dueDate;
                         newTasks[i][2] = importance;
                     }
-                }/*
-                try (FileWriter fileWriter = new FileWriter("task.csv", true)) {
+                }
+                try (FileWriter fileWriter = new FileWriter("tasks.csv", true)) {
                     fileWriter.append("\n" + description + ", " + dueDate + ", " + importance);
                 } catch (IOException e) {
                     System.out.println("File cannot be updated");
-                }*/
+                }
                 selectAnOption();
+                break;
             }
-            if (optionChosen.equals("remove")) {
+            case "remove": {
                 Scanner scan2 = new Scanner(System.in);
+                String newLines[];
                 System.out.println("Please select number to remove");
                 int num = scan2.nextInt();
-                newTasks = ArrayUtils.remove(tasks(), num);
-                System.out.println(Arrays.toString(newTasks));
+                newLines = ArrayUtils.remove(arrayWithLines(), num);
+
+                try (FileWriter fileWriter = new FileWriter("tasks.csv", false)) {
+                    for (int i = 0; i < newLines.length; i++) {
+                        if (i < newLines.length - 1) {
+                            fileWriter.append(newLines[i] + "\n");
+                        } else {
+                            fileWriter.append(newLines[i]);
+                        }
+                    }
+                } catch (IOException e) {
+                    System.out.println("File cannot be updated");
+                }
                 selectAnOption();
+                break;
             }
-            if (optionChosen.equals("list")) {
+
+            case "list": {
                 System.out.println("List of tasks:");
                 for (int i = 0; i < tasks().length; i++) {
                     System.out.print(i + " : ");
@@ -130,13 +151,18 @@ public class TaskManager {
                     System.out.println();
                 }
                 selectAnOption();
+                break;
+            }
+            case "exit": {
+                System.out.print(ConsoleColors.RED + "Bye, bye");
+                break;
+            }
+            default: {
+                System.out.println("Option unidentified");
+                selectAnOption();
             }
 
-            if (optionChosen.equals("exit")) {
-                System.out.println(ConsoleColors.RED + "Bye, bye");
-            }
         }
-
     }
 }
 
